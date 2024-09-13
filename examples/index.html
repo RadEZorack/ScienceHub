@@ -25,6 +25,11 @@
             \end{document}
         </latex>
     </section>
+
+    <section>
+        <h1>Latex File to PDF</h1>
+        <latex src="./scripts/sample.tex"></latex>
+    </section>
     
     <section>
         <h1>Python From File</h1>
@@ -72,9 +77,8 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
         <script type="text/javascript">
-            console.log(document.location);
             function updateContent() {
-                $("p").text(document.location.origin);
+                $("p").text("This content was updated using jQuery!");
             }
         </script>
     

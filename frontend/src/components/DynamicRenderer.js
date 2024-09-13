@@ -57,7 +57,7 @@ const DynamicRenderer = () => {
     // Use a DOM parser to update relative links
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
-
+  
     // Adjust all <a> tags with relative hrefs
     doc.querySelectorAll('a').forEach((link) => {
       const href = link.getAttribute('href');
@@ -66,37 +66,67 @@ const DynamicRenderer = () => {
         link.setAttribute('href', new URL(href, baseUrl).toString());
       }
     });
-
+  
+    // Handle <latex> tags with or without the 'src' attribute
+    const latexElements = doc.querySelectorAll('latex');
+    for (const element of latexElements) {
+      const src = element.getAttribute('src');
+  
+      if (src) {
+        // Handle external LaTeX source file
+        try {
+          const fileUrl = new URL(src, baseUrl).toString(); // Construct the full URL
+          const response = await axios.get(fileUrl);
+          const latexCode = response.data;
+          const latexHash = CryptoJS.MD5(latexCode.trim()).toString();
+  
+          // Check if the LaTeX content is already cached in the CDN
+          const cachedFileUrl = `${cdnUrl}${latexHash}.pdf`;
+          try {
+            const headResponse = await axios.head(cachedFileUrl);
+            if (headResponse.status === 200) {
+              // If cached, use the cached file URL
+              element.outerHTML = `<iframe src="${cachedFileUrl}" width="600" height="400" frameborder="0"></iframe>`;
+            }
+          } catch (error) {
+            // If not cached, send it to the backend renderer
+            const renderResponse = await axios.post(latexRendererUrl, { latex_code: latexCode.trim(), hash: latexHash });
+            element.outerHTML = `<iframe src="${renderResponse.data.url}" width="600" height="400" frameborder="0"></iframe>`;
+          }
+        } catch (error) {
+          console.error('Error fetching LaTeX source file:', error);
+          element.outerHTML = `<p>Error loading LaTeX from ${src}</p>`;
+        }
+      } else {
+        // Handle inline LaTeX content
+        const latexCode = element.textContent;
+        const latexHash = CryptoJS.MD5(latexCode.trim()).toString();
+  
+        // Check if the LaTeX content is already cached in the CDN
+        const cachedFileUrl = `${cdnUrl}${latexHash}.pdf`;
+        try {
+          const headResponse = await axios.head(cachedFileUrl);
+          if (headResponse.status === 200) {
+            // If cached, use the cached file URL
+            element.outerHTML = `<iframe src="${cachedFileUrl}" width="600" height="400" frameborder="0"></iframe>`;
+          }
+        } catch (error) {
+          // If not cached, send it to the backend renderer
+          const renderResponse = await axios.post(latexRendererUrl, { latex_code: latexCode.trim(), hash: latexHash });
+          element.outerHTML = `<iframe src="${renderResponse.data.url}" width="600" height="400" frameborder="0"></iframe>`;
+        }
+      }
+    }
+  
     // Serialize the adjusted HTML back to a string
     const adjustedHtml = new XMLSerializer().serializeToString(doc);
-
-    // Handle custom tags like <latex>, <python>, etc.
-    let parsedContent = await replaceCustomTags(
-      adjustedHtml,
-      /<latex>([\s\S]*?)<\/latex>/gi,
-      'latex_code',
-      cdnUrl,
-      latexRendererUrl,
-      'pdf'
-    );
-    // htmlContent = await replaceCustomTags(
-    //   htmlContent,
-    //   /<python>([\s\S]*?)<\/python>/gi,
-    //   'python_code',
-    //   cdnUrl,
-    //   pythonRendererUrl,
-    //   'html'
-    // );
-    // htmlContent = await replaceCustomTags(
-    //   htmlContent,
-    //   /<r>([\s\S]*?)<\/r>/gi,
-    //   'r_code',
-    //   cdnUrl,
-    //   rRendererUrl,
-    //   'html'
-    // );
-    return parsedContent;
+  
+    // Handle custom tags like <python>, <r>, etc., if needed
+    // (additional parsing code can go here)
+  
+    return adjustedHtml;
   };
+  
 
   const replaceCustomTags = async (htmlContent, regex, queryParam, cdnUrl, backendUrl, fileExtension) => {
     // Match all instances of the custom tags
