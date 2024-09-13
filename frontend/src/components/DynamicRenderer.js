@@ -29,15 +29,15 @@ const DynamicRenderer = () => {
     parseContentFromUrl(url);
   }, [url]);
 
-  const parseContentFromUrl = async () => {
+  const parseContentFromUrl = async (targetUrl) => {
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(targetUrl);
       let fetchedContent = response.data;
 
       if (url.endsWith('.pyml')) {
-        fetchedContent = await parsePyml(fetchedContent);
+        fetchedContent = await parsePyml(fetchedContent, targetUrl);
       } else {
-        fetchedContent = await parseCustomTags(fetchedContent);
+        fetchedContent = await parseCustomTags(fetchedContent, targetUrl);
       }
 
       setContent(fetchedContent);
@@ -52,9 +52,27 @@ const DynamicRenderer = () => {
     return parsedContent;
   };
 
-  const parseCustomTags = async (htmlContent) => {
-    htmlContent = await replaceCustomTags(
-      htmlContent,
+  // Function to parse custom tags and adjust links
+  const parseCustomTags = async (htmlContent, baseUrl) => {
+    // Use a DOM parser to update relative links
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+
+    // Adjust all <a> tags with relative hrefs
+    doc.querySelectorAll('a').forEach((link) => {
+      const href = link.getAttribute('href');
+      if (href && !href.startsWith('http') && !href.startsWith('//')) {
+        // Convert relative hrefs to absolute using the base URL from the input
+        link.setAttribute('href', new URL(href, baseUrl).toString());
+      }
+    });
+
+    // Serialize the adjusted HTML back to a string
+    const adjustedHtml = new XMLSerializer().serializeToString(doc);
+
+    // Handle custom tags like <latex>, <python>, etc.
+    let parsedContent = await replaceCustomTags(
+      adjustedHtml,
       /<latex>([\s\S]*?)<\/latex>/gi,
       'latex_code',
       cdnUrl,
@@ -77,7 +95,7 @@ const DynamicRenderer = () => {
     //   rRendererUrl,
     //   'html'
     // );
-    return htmlContent;
+    return parsedContent;
   };
 
   const replaceCustomTags = async (htmlContent, regex, queryParam, cdnUrl, backendUrl, fileExtension) => {
