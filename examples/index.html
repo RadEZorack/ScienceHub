@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inline code</title>
+</head>
+<body>
+
+    <section>
+        <h1>Welcome to Quantum Mechanics</h1>
+        <p>This document provides an overview of quantum mechanics, exploring fundamental concepts such as wave-particle duality, superposition, and entanglement.</p>
+        <h1>Inline Latex to PDF</h1>
+        <latex>
+            \documentclass{article}
+            \usepackage{amsmath}  % Include packages for additional math formatting
+            \usepackage[utf8]{inputenc}  % Ensure proper encoding
+            \begin{document}
+    
+            The Schrödinger equation is expressed as:
+            \[
+            i \hbar \frac{\partial}{\partial t} \Psi(x,t) = -\frac{\hbar^2}{2m} \frac{\partial^2}{\partial x^2} \Psi(x,t)
+            \]
+
+            \end{document}
+        </latex>
+    </section>
+    
+    <section>
+        <h1>Python From File</h1>
+        <h2>Visualizing Quantum States</h2>
+        <p>This section provides an interactive graph to visualize quantum states over time.</p>
+        <python src="scripts/plot_quantum_states.py" cache="True" />
+        <h1>Inline Python</h1>
+        <python>
+            # Example Python code to add two numbers
+            a = 5
+            b = 10
+            output = a + b
+            print(f"The result of adding {a} and {b} is: {output}")
+        </python>
+    </section>
+    
+    <section>
+        <h1>Inline R code</h1>
+        <r>
+        # Generate random data
+        # set.seed(42)
+        data <- rnorm(100, mean = 50, sd = 10)
+    
+        # Calculate basic statistics
+        mean_value <- mean(data)
+        sd_value <- sd(data)
+    
+        # Print the statistics
+        cat("Mean of the data:", mean_value, "\n")
+        cat("Standard deviation of the data:", sd_value, "\n")
+    
+        # Create a histogram and save it to a file
+        png(filename = "tmp/r_output_histogram.png")
+        hist(data, main = "Histogram of Random Data", xlab = "Values", col = "skyblue", border = "white")
+        dev.off()
+    
+        cat("&lt;img src=&quot;tmp/r_output_histogram.png&quot; alt=&quot;R Output Image&quot; /&gt;")
+        </r>
+    </section>
+    
+    <section>
+        <h1>Normal JavaScript</h1>
+        <p>This is an example where you can run JavaScript.</p>
+    
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+        <script type="text/javascript">
+            function updateContent() {
+                $("p").text("This content was updated using jQuery!");
+            }
+        </script>
+    
+        <button onclick="updateContent()">Update Content</button>
+    </section>
+    
+    <footer>
+        <h1>Anchor Tag</h1>
+        <a href="http://localhost:8081/pages/about.html">Learn More About Quantum Mechanics</a>
+    </footer>
+      
+</body>
+</html>

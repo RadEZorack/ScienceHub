@@ -1,0 +1,4 @@
+Flask==2.3.3          # Web framework for creating the API
+Flask-CORS
+requests==2.31.0      # HTTP library for making requests (if needed)
+sympy==1.13.2

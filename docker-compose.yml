@@ -1,0 +1,61 @@
+version: '3.8'
+services:
+  latex-renderer:
+    build: ./services/latex-renderer
+    ports:
+      - "5001:5001"
+    environment:
+      CDN_PATH: /shared-cdn  # Use the shared volume path
+      CDN_URL: http://localhost:8080
+    volumes:
+      - shared-cdn:/shared-cdn  # Mount the shared volume
+
+  # python-renderer:
+  #   build: ./python-renderer
+  #   ports:
+  #     - "5002:5002"
+  #   environment:
+  #     CDN_PATH: /shared-cdn
+  #     CDN_URL: http://localhost:8080
+  #   volumes:
+  #     - shared-cdn:/shared-cdn
+
+  # r-renderer:
+  #   build: ./r-renderer
+  #   ports:
+  #     - "5003:5003"
+  #   environment:
+  #     CDN_PATH: /shared-cdn
+  #     CDN_URL: http://localhost:8080
+  #   volumes:
+  #     - shared-cdn:/shared-cdn
+
+  local-cdn:
+    build: ./docker-cdn
+    ports:
+      - "8080:8080"
+    volumes:
+      - shared-cdn:/usr/share/nginx/html  # Mount the shared volume to the public CDN path
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_CDN_URL: http://localhost:8080/
+        REACT_APP_LATEX_RENDERER_URL: http://localhost:5001/render
+        REACT_APP_PYTHON_RENDERER_URL: http://localhost:5002/execute
+        REACT_APP_R_RENDERER_URL: http://localhost:5003/execute
+    ports:
+      - "3000:3000"
+
+  local-dev-server:
+    image: node:14-alpine  # Use a lightweight Node.js image
+    working_dir: /app
+    command: sh -c "npm install -g http-server && http-server -p 8081 --cors"
+    volumes:
+      - ./examples:/app  # Mount your local examples directory
+    ports:
+      - "8081:8081"
+
+volumes:
+  shared-cdn:  # Declare the shared volume
