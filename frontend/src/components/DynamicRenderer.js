@@ -137,17 +137,17 @@ const DynamicRenderer = () => {
       const pythonHash = CryptoJS.MD5(pythonCode.trim()).toString();
       const cachedFileUrl = `${cdnUrl}${pythonHash}.html`;
 
-      try {
-        const headResponse = await axios.head(cachedFileUrl);
-        if (headResponse.status === 200) {
-          // Use cached file
-          element.outerHTML = `<iframe src="${cachedFileUrl}" width="600" height="400" frameborder="0"></iframe>`;
-        }
-      } catch (error) {
+      // try {
+      //   const headResponse = await axios.head(cachedFileUrl);
+      //   if (headResponse.status === 200) {
+      //     // Use cached file
+      //     element.outerHTML = `<iframe src="${cachedFileUrl}" width="600" height="400" frameborder="0"></iframe>`;
+      //   }
+      // } catch (error) {
         // If not cached, send to backend
         const renderResponse = await axios.post(pythonRendererUrl, { python_code: pythonCode.trim(), hash: pythonHash });
         element.outerHTML = `<iframe src="${renderResponse.data.url}" width="600" height="400" frameborder="0"></iframe>`;
-      }
+      // }
     }
   
     // Serialize the adjusted HTML back to a string

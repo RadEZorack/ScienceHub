@@ -23,8 +23,8 @@ def execute_python_code():
     output_file_path = os.path.join(CDN_PATH, f"{code_hash}.html")
 
     # If the output file already exists, return the cached result
-    if os.path.exists(output_file_path):
-        return jsonify({'url': f"{CDN_URL}/{code_hash}.html"})
+    # if os.path.exists(output_file_path):
+    #     return jsonify({'url': f"{CDN_URL}/{code_hash}.html"})
 
     try:
         # Write the Python code to a temporary file
