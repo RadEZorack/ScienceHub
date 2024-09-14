@@ -117,6 +117,38 @@ const DynamicRenderer = () => {
         }
       }
     }
+
+    // Handle <python> tags
+    const pythonElements = doc.querySelectorAll('python');
+    for (const element of pythonElements) {
+      const src = element.getAttribute('src');
+      let pythonCode;
+
+      if (src) {
+        // Handle external Python source file
+        const fileUrl = new URL(src, baseUrl).toString(); // Construct the full URL
+        const response = await axios.get(fileUrl);
+        pythonCode = response.data;
+      } else {
+        // Handle inline Python content
+        pythonCode = element.textContent;
+      }
+
+      const pythonHash = CryptoJS.MD5(pythonCode.trim()).toString();
+      const cachedFileUrl = `${cdnUrl}${pythonHash}.html`;
+
+      try {
+        const headResponse = await axios.head(cachedFileUrl);
+        if (headResponse.status === 200) {
+          // Use cached file
+          element.outerHTML = `<iframe src="${cachedFileUrl}" width="600" height="400" frameborder="0"></iframe>`;
+        }
+      } catch (error) {
+        // If not cached, send to backend
+        const renderResponse = await axios.post(pythonRendererUrl, { python_code: pythonCode.trim(), hash: pythonHash });
+        element.outerHTML = `<iframe src="${renderResponse.data.url}" width="600" height="400" frameborder="0"></iframe>`;
+      }
+    }
   
     // Serialize the adjusted HTML back to a string
     const adjustedHtml = new XMLSerializer().serializeToString(doc);

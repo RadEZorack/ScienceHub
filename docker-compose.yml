@@ -10,15 +10,15 @@ services:
     volumes:
       - shared-cdn:/shared-cdn  # Mount the shared volume
 
-  # python-renderer:
-  #   build: ./python-renderer
-  #   ports:
-  #     - "5002:5002"
-  #   environment:
-  #     CDN_PATH: /shared-cdn
-  #     CDN_URL: http://localhost:8080
-  #   volumes:
-  #     - shared-cdn:/shared-cdn
+  python-renderer:
+    build: ./services/python-renderer
+    ports:
+      - "5002:5002"
+    environment:
+      CDN_PATH: /shared-cdn
+      CDN_URL: http://localhost:8080
+    volumes:
+      - shared-cdn:/shared-cdn
 
   # r-renderer:
   #   build: ./r-renderer
